@@ -23,10 +23,29 @@ const createMockDogImage = (id: string, name: string): DogImage => ({
   }]
 })
 
-const createMockResponse = (data: DogImage[]) => ({
-  ok: true,
-  json: async () => data
-})
+const createMockResponse = (
+  data: DogImage[],
+  paginationCount?: number,
+  paginationPage?: number,
+  paginationLimit?: number
+) => {
+  const headers = new Headers()
+  if (paginationCount !== undefined) {
+    headers.set('Pagination-Count', String(paginationCount))
+  }
+  if (paginationPage !== undefined) {
+    headers.set('Pagination-Page', String(paginationPage))
+  }
+  if (paginationLimit !== undefined) {
+    headers.set('Pagination-Limit', String(paginationLimit))
+  }
+
+  return {
+    ok: true,
+    headers,
+    json: async () => data
+  }
+}
 
 const createErrorResponse = (status: number, statusText: string) => ({
   ok: false,
@@ -59,7 +78,15 @@ describe('Dog API Service', () => {
 
     describe('default parameters', () => {
       it('should fetch dogs with default parameters', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+        const totalCount = 100
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(
+            mockDogImages,
+            totalCount,
+            DOG_API_CONSTANTS.DEFAULT_PAGE,
+            DOG_API_CONSTANTS.DEFAULT_IMAGE_LIMIT
+          )
+        )
 
         const result = await getDogsWithImages()
 
@@ -75,16 +102,19 @@ describe('Dog API Service', () => {
         expect(result.data).toEqual(mockDogImages)
         expect(result.page).toBe(DOG_API_CONSTANTS.DEFAULT_PAGE)
         expect(result.limit).toBe(DOG_API_CONSTANTS.DEFAULT_IMAGE_LIMIT)
-        expect(result.total).toBeGreaterThan(0)
+        expect(result.total).toBe(totalCount)
       })
     })
 
     describe('pagination parameters', () => {
       it('should fetch dogs with custom limit and page', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
-
         const limit = 10
         const page = 2
+        const totalCount = 50
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, totalCount, page, limit)
+        )
+
         const result = await getDogsWithImages(limit, page)
 
         const url = getFetchUrl()
@@ -93,12 +123,15 @@ describe('Dog API Service', () => {
 
         expect(result.limit).toBe(limit)
         expect(result.page).toBe(page)
+        expect(result.total).toBe(totalCount)
       })
     })
 
     describe('breed filtering', () => {
       it('should include breed_ids parameter when breedId is provided', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, 10, 0, 20)
+        )
 
         const breedId = '123'
         await getDogsWithImages(20, 0, breedId)
@@ -108,7 +141,9 @@ describe('Dog API Service', () => {
       })
 
       it('should not include breed_ids parameter when breedId is not provided', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, 100, 0, 20)
+        )
 
         await getDogsWithImages()
 
@@ -122,7 +157,9 @@ describe('Dog API Service', () => {
         'should accept %s image size parameter',
         async (size) => {
           vi.clearAllMocks()
-          mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+          mockFetch.mockResolvedValueOnce(
+            createMockResponse(mockDogImages, 50, 0, 20)
+          )
 
           await getDogsWithImages(20, 0, undefined, size)
 
@@ -134,7 +171,9 @@ describe('Dog API Service', () => {
 
     describe('request headers', () => {
       it('should include API key in request headers', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, 100, 0, 20)
+        )
 
         await getDogsWithImages()
 
@@ -145,17 +184,37 @@ describe('Dog API Service', () => {
       })
     })
 
-    describe('pagination calculation', () => {
-      it('should calculate total pages correctly when data length is less than limit', async () => {
-        const singleDog = [mockDogImages[0]]
-        mockFetch.mockResolvedValueOnce(createMockResponse(singleDog))
-
+    describe('pagination headers', () => {
+      it('should use pagination headers from API response', async () => {
+        const totalCount = 150
+        const page = 1
         const limit = 20
-        const page = 0
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, totalCount, page, limit)
+        )
+
         const result = await getDogsWithImages(limit, page)
 
-        // When data.length < limit, total = (page * limit) + dataLength
-        expect(result.total).toBe((page * limit) + singleDog.length)
+        expect(result.total).toBe(totalCount)
+        expect(result.page).toBe(page)
+        expect(result.limit).toBe(limit)
+      })
+
+      it('should use fallback values when pagination headers are missing', async () => {
+        const limit = 20
+        const page = 0
+        // Create response without pagination headers
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          headers: new Headers(),
+          json: async () => mockDogImages
+        })
+
+        const result = await getDogsWithImages(limit, page)
+
+        expect(result.total).toBe(0) // No count header, defaults to 0
+        expect(result.page).toBe(page) // Falls back to provided page
+        expect(result.limit).toBe(limit) // Falls back to provided limit
       })
     })
 
@@ -177,7 +236,9 @@ describe('Dog API Service', () => {
 
     describe('response handling', () => {
       it('should handle empty response array', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse([]))
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse([], 0, 0, 20)
+        )
 
         const result = await getDogsWithImages()
 
@@ -186,9 +247,14 @@ describe('Dog API Service', () => {
       })
 
       it('should return correct paginated response structure', async () => {
-        mockFetch.mockResolvedValueOnce(createMockResponse(mockDogImages))
+        const totalCount = 200
+        const page = 1
+        const limit = 20
+        mockFetch.mockResolvedValueOnce(
+          createMockResponse(mockDogImages, totalCount, page, limit)
+        )
 
-        const result = await getDogsWithImages(20, 1)
+        const result = await getDogsWithImages(limit, page)
 
         expect(result).toHaveProperty('data')
         expect(result).toHaveProperty('total')
@@ -196,6 +262,9 @@ describe('Dog API Service', () => {
         expect(result).toHaveProperty('limit')
         expect(Array.isArray(result.data)).toBe(true)
         expect(typeof result.total).toBe('number')
+        expect(result.total).toBe(totalCount)
+        expect(result.page).toBe(page)
+        expect(result.limit).toBe(limit)
       })
     })
   })

@@ -69,7 +69,7 @@ describe('BaseButton', () => {
   })
 
   it('should accept different type variants', () => {
-    const types = ['default', 'primary', 'success', 'warning', 'danger', 'info']
+    const types = ['default', 'primary', 'success', 'warning', 'danger', 'info', 'link']
     
     types.forEach(type => {
       const wrapper = mount(BaseButton, {

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 w-1/2 mx-auto">
+  <div class="p-4 sm:w-1/2 mx-auto">
     <h2 v-if="props.dogName" class="text-2xl font-bold text-black mb-4">
       Timeline for {{ props.dogName }}
     </h2>
@@ -23,17 +23,16 @@
 </template>
 
 <script setup lang="ts">
-import type { TimelineEvent } from '@/types/dog'
-import { formatDate } from '@/utils/date.utils'
-import { useTimelineEvent } from '@/composables/useTimelineEvent'
+import type { TimelineEvent } from "@/types/dog";
+import { formatDate } from "@/utils/date.utils";
+import { useTimelineEvent } from "@/composables/useTimelineEvent";
 
 interface Props {
-  timeline: TimelineEvent[]
-  dogName?: string
+  timeline: TimelineEvent[];
+  dogName?: string;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const { getEventType } = useTimelineEvent()
+const { getEventType } = useTimelineEvent();
 </script>
-

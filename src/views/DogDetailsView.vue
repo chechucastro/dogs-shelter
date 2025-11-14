@@ -5,7 +5,7 @@
       body-style="spacious"
       custom-class="container mx-auto max-w-[1200px]"
     >
-      <BaseButton type="text" @click="goBack" custom-class="mb-4">
+      <BaseButton link @click="goBack" custom-class="mb-4">
         <el-icon class="mr-1"><ArrowLeft /></el-icon>
         Back to List
       </BaseButton>
@@ -115,7 +115,9 @@
       </div>
 
       <div v-else>
-        <p class="text-gray-600">No timeline events available for {{ dog?.name || 'this dog' }}.</p>
+        <p class="text-gray-600">
+          No timeline events available for {{ dog?.name || "this dog" }}.
+        </p>
       </div>
     </BaseCard>
   </div>

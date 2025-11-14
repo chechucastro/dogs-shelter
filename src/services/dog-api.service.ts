@@ -1,7 +1,6 @@
 import type { DogImage, PaginatedResponse } from '@/types/dog'
 import { API_ENDPOINTS } from '@/enums/api-endpoints.enum'
 import { DOG_API_CONSTANTS, type ImageSize } from '@/enums/dog-api.enum'
-import { estimateTotalPagination } from '@/utils/pagination.utils'
 
 // Constants
 const API_KEY = import.meta.env.VITE_DOG_API_KEY
@@ -10,11 +9,20 @@ const API_HEADERS = {
   'x-api-key': API_KEY
 } as const
 
+// Pagination header names (case-insensitive, but using exact API format)
+const PAGINATION_HEADERS = {
+  COUNT: 'Pagination-Count',
+  PAGE: 'Pagination-Page',
+  LIMIT: 'Pagination-Limit'
+} as const
 
 /**
- * Makes an API request with error handling
+ * Makes an API request with error handling and returns both data and response
  */
-async function apiRequest<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+async function apiRequestWithResponse<T>(
+  endpoint: string,
+  params?: Record<string, string | number | boolean | undefined>
+): Promise<{ data: T; response: Response }> {
   const url = new URL(`${BASE_URL}${endpoint}`)
   
   if (params) {
@@ -33,7 +41,27 @@ async function apiRequest<T>(endpoint: string, params?: Record<string, string | 
     throw new Error(`API request failed: ${response.status} ${response.statusText}`)
   }
 
-  return response.json()
+  const data = await response.json()
+  return { data, response }
+}
+
+/**
+ * Extracts pagination information from response headers
+ */
+function extractPaginationFromHeaders(response: Response, fallbackLimit: number, fallbackPage: number): {
+  total: number
+  page: number
+  limit: number
+} {
+  const countHeader = response.headers.get(PAGINATION_HEADERS.COUNT)
+  const pageHeader = response.headers.get(PAGINATION_HEADERS.PAGE)
+  const limitHeader = response.headers.get(PAGINATION_HEADERS.LIMIT)
+
+  return {
+    total: countHeader ? parseInt(countHeader, 10) : 0,
+    page: pageHeader ? parseInt(pageHeader, 10) : fallbackPage,
+    limit: limitHeader ? parseInt(limitHeader, 10) : fallbackLimit
+  }
 }
 
 /**
@@ -57,13 +85,14 @@ export async function getDogsWithImages(
       params.breed_ids = breedId
     }
 
-    const data = await apiRequest<DogImage[]>(API_ENDPOINTS.IMAGES_SEARCH, params)
+    const { data, response } = await apiRequestWithResponse<DogImage[]>(API_ENDPOINTS.IMAGES_SEARCH, params)
+    const pagination = extractPaginationFromHeaders(response, limit, page)
     
     return {
       data,
-      total: estimateTotalPagination(data.length, limit, page),
-      page,
-      limit
+      total: pagination.total,
+      page: pagination.page,
+      limit: pagination.limit
     }
   } catch (error) {
     console.error('Error fetching dogs with images:', error)

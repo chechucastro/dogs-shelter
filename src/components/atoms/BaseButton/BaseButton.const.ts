@@ -5,7 +5,7 @@ export const TYPE_VARIANTS = {
   warning: 'warning',
   danger: 'danger',
   info: 'info',
-  text: 'text',
+  link: 'link',
 } as const
 
 export const SIZE_VARIANTS = {

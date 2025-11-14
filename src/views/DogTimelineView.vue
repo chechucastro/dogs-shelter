@@ -1,6 +1,6 @@
 <template>
   <div class="dog-timeline-view mx-auto px-4 py-6 max-w-[1000px]">
-    <BaseButton type="text" @click="goBack" custom-class="mb-4">
+    <BaseButton type="link" @click="goBack" custom-class="mb-4">
       <el-icon class="mr-1"><ArrowLeft /></el-icon>
       Back to Details
     </BaseButton>

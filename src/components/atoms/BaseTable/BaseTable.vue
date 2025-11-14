@@ -23,7 +23,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   data: () => [],
   stripe: false,
-  style: 'width: 100%',
+  style: () => ({ width: '100%' }), // Element Plus requires an object here..... ok!
   customClass: '',
 })
 
@@ -36,4 +36,3 @@ const tableClass = computed(() => {
   return props.customClass ? `${variantClass} ${props.customClass}` : variantClass
 })
 </script>
-

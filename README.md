@@ -7,7 +7,7 @@ Built following SOLID principles and atomic design patterns to decouple logic fr
 
 - 🐕 **Dog List View**: Browse available dogs with table or card views
 - 🔍 **Breed Filtering**: Filter dogs by breed with searchable dropdown
-- 📄 **Pagination**: Navigate through large lists of dogs
+- 📄 **Server-Side Pagination**: Navigate through large lists using API pagination headers
 - 📱 **Responsive Design**: Mobile-friendly interface using Tailwind CSS
 - 👤 **Admin Features**: Timeline view restricted to admin users
 - 🎨 **Multiple View Modes**: Switch between table, cards, and mini cards
@@ -70,7 +70,6 @@ src/
 ├── utils/             # Utility functions
 │   ├── dog.utils.ts            # Dog data transformations
 │   ├── navigation.utils.ts    # Navigation helpers
-│   ├── pagination.utils.ts     # Pagination calculations
 │   └── date.utils.ts           # Date formatting
 ├── types/              # TypeScript type definitions
 ├── enums/              # Constants and enums
@@ -109,9 +108,11 @@ npm run dev
 
 ### View Modes
 
-1. **Table View**: Traditional table layout with sortable columns
-2. **Card View**: Detailed cards showing dog information
-3. **Mini Card View**: Compact cards with just name and image
+1. **Table View**: Traditional table layout with sortable columns and pagination
+2. **Card View**: Detailed cards showing dog information with pagination
+3. **Mini Card View**: Compact cards with just name and image with pagination
+
+All view modes support server-side pagination, ensuring efficient data loading and accurate total counts from the API.
 
 ### Admin Features
 
@@ -124,12 +125,13 @@ npm run dev
 The app uses [The Dog API](https://thedogapi.com/) to fetch dog breeds and images. 
 
 **Features:**
-- Single API call to fetch dogs with images and breed data
-- Automatic breed extraction from image responses
-- Pagination support
-- Breed filtering
-- Image size variants (thumb, small, med, full)
-- Error handling and loading states
+- **Optimized Loading**: Single API call on initial load (fetches dogs and extracts breeds from response)
+- **Server-Side Pagination**: Uses API response headers (`Pagination-Count`, `Pagination-Page`, `Pagination-Limit`) for accurate pagination
+- **Breed Accumulation**: Breeds are automatically extracted and accumulated from API responses as users navigate
+- **Breed Filtering**: Filter dogs by breed with server-side filtering
+- **Image Size Variants**: Support for different image sizes (thumb, small, med, full)
+- **Error Handling**: Comprehensive error handling and loading states
+- **Efficient Data Fetching**: Only fetches the current page of data, reducing bandwidth
 
 The API key is configured via environment variables (`VITE_DOG_API_KEY`).
 

@@ -30,9 +30,7 @@
       <DogTable
         v-if="viewMode === 'table'"
         :dogs="dogStore.dogs"
-        :loading="
-          dogStore.loading || (!dogStore.imagesFetched && dogStore.dogs.length === 0)
-        "
+        :loading="dogStore.loading"
         @view="handleViewDog"
       />
 

@@ -10,7 +10,7 @@ export const buttonVariants = tv({
       warning: 'bg-yellow-500 text-white hover:bg-yellow-600',
       danger: 'bg-red-500 text-white hover:bg-red-600',
       info: 'bg-gray-500 text-white hover:bg-gray-600',
-      text: 'text-gray-900 hover:text-gray-600',
+      link: 'text-gray-900 hover:text-gray-600',
     },
     size: {
       large: 'text-lg px-4 py-2',
