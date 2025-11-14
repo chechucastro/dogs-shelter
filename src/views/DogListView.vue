@@ -10,7 +10,7 @@
       >
         <BaseBreedFilter
           :breeds="dogStore.breeds"
-          :model-value="selectedBreed"
+          :model-value="selectedBreedFilter"
           @update:model-value="handleBreedChange"
         />
 
@@ -67,7 +67,7 @@ import BaseCard from "@/components/atoms/BaseCard/BaseCard.vue";
 const {
   dogStore,
   viewMode,
-  selectedBreed,
+  selectedBreedFilter,
   handleBreedChange,
   handleViewChange,
   handlePageChange,

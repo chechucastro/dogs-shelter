@@ -8,7 +8,7 @@ export const useDogStore = defineStore('dog', () => {
   const dogs = ref<Dog[]>([])
   const breeds = ref<DogBreed[]>([])
   const dogImages = ref<DogImage[]>([])
-  const selectedBreed = ref<string | undefined>(undefined)
+  const selectedBreedFilter = ref<string | undefined>(undefined)
   const currentPage = ref<number>(1)
   const pageSize = ref<number>(10)
   const total = ref<number>(0)
@@ -54,8 +54,8 @@ export const useDogStore = defineStore('dog', () => {
       const apiPage = currentPage.value - 1
       
       // Get breed ID if breed is selected
-      const breedId = selectedBreed.value
-        ? breeds.value.find(b => b.name === selectedBreed.value)?.id.toString()
+      const breedId = selectedBreedFilter.value
+        ? breeds.value.find(b => b.name === selectedBreedFilter.value)?.id.toString()
         : undefined
 
       const response = await getDogsWithImages(pageSize.value, apiPage, breedId)
@@ -100,8 +100,8 @@ export const useDogStore = defineStore('dog', () => {
     return image ? transformToDog(image) : null
   }
 
-  function setSelectedBreed(breedName: string | undefined): void {
-    selectedBreed.value = breedName
+  function setSelectedBreedFilter(breedName: string | undefined): void {
+    selectedBreedFilter.value = breedName
     resetPagination()
     fetchDogs() // Refetch with new breed filter
   }
@@ -127,14 +127,14 @@ export const useDogStore = defineStore('dog', () => {
   return {
     dogs,
     breeds,
-    selectedBreed,
+    selectedBreedFilter,
     currentPage,
     pageSize,
     total,
     loading,
     error,
     totalPages,
-    setSelectedBreed,
+    setSelectedBreedFilter,
     setPage,
     setPageSize,
     initialize,

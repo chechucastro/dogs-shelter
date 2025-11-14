@@ -122,13 +122,13 @@ describe('Dog Store', () => {
     const dogStore = useDogStore()
     await dogStore.initialize()
 
-    dogStore.setSelectedBreed('Golden Retriever')
+    dogStore.setSelectedBreedFilter('Golden Retriever')
 
     // Wait for async fetch
     await new Promise(resolve => setTimeout(resolve, 100))
 
     expect(getDogsWithImages).toHaveBeenCalledTimes(2)
-    expect(dogStore.selectedBreed).toBe('Golden Retriever')
+    expect(dogStore.selectedBreedFilter).toBe('Golden Retriever')
     expect(dogStore.currentPage).toBe(1) // Should reset to page 1
   })
 
@@ -162,7 +162,7 @@ describe('Dog Store', () => {
     dogStore.setPage(3)
     expect(dogStore.currentPage).toBe(3)
 
-    dogStore.setSelectedBreed('Golden Retriever')
+    dogStore.setSelectedBreedFilter('Golden Retriever')
 
     // Wait for async fetch
     await new Promise(resolve => setTimeout(resolve, 100))

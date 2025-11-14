@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDogStore } from '@/stores/dog.store'
 import type { ViewMode } from '@/components/atoms/BaseRadioButton/BaseRadioButton.const'
@@ -12,11 +12,9 @@ export function useDogList() {
   const dogStore = useDogStore()
 
   const viewMode = ref<ViewMode>('table')
-  const selectedBreed = ref<string | undefined>(dogStore.selectedBreed)
 
   const handleBreedChange = (breed: string | undefined): void => {
-    selectedBreed.value = breed
-    dogStore.setSelectedBreed(breed)
+    dogStore.setSelectedBreedFilter(breed)
   }
 
   const handleViewChange = (mode: ViewMode): void => {
@@ -34,7 +32,7 @@ export function useDogList() {
   return {
     dogStore,
     viewMode,
-    selectedBreed,
+    selectedBreedFilter: computed(() => dogStore.selectedBreedFilter),
     handleBreedChange,
     handleViewChange,
     handlePageChange,
