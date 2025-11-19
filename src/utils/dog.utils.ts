@@ -1,4 +1,4 @@
-import type { Dog, DogBreed, DogImage } from '@/types/dog'
+import type { Dog, DogImage } from '@/types/dog'
 
 /**
  * Transforms a DogImage from the API into a Dog object
@@ -20,34 +20,7 @@ export function transformToDog(image: DogImage): Dog {
     height: breed?.height?.metric || undefined,
     temperament: breed?.temperament || undefined,
     birthDate: undefined, // API doesn't provide this
-    age: undefined // API doesn't provide this
-  }
-}
-
-/**
- * Transforms a DogBreed into a Dog object
- * 
- * @param breed - The breed data
- * @param breedImages - Map of breed IDs to image URLs
- * @param breedImageIds - Map of breed IDs to image IDs
- * @returns A Dog object with transformed data
- */
-export function transformBreedToDog(
-  breed: DogBreed,
-  breedImages: Record<number, string>,
-  breedImageIds: Record<number, string>
-): Dog {
-  return {
-    id: breedImageIds[breed.id] || breed.id.toString(),
-    name: breed.name,
-    breed: breed.name,
-    description: breed.bred_for,
-    weight: breed.weight?.metric,
-    height: breed.height?.metric,
-    temperament: breed.temperament,
-    imageUrl: breedImages[breed.id],
-    age: breed.life_span,
-    birthDate: undefined,
+    age: breed?.life_span || undefined
   }
 }
 
